@@ -1,5 +1,5 @@
 // Bump this version string after you change index.html so installed copies refresh.
-const C = "tryhard-v4";
+const C = "tryhard-v6";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -22,5 +22,14 @@ self.addEventListener("fetch", e => {
       return res;
     }).catch(() => hit);
     return hit || net;
+  }));
+});
+
+// Tapping a notification brings the app to the front.
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({type: "window", includeUncontrolled: true}).then(list => {
+    for (const c of list) { if ("focus" in c) return c.focus(); }
+    return self.clients.openWindow("./");
   }));
 });
